@@ -25,7 +25,7 @@ app.secret_key = "ey_demo_secret_key_2025_super_secret"
 # Users file
 # Users file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-USERS_FILE = os.path.join(BASE_DIR, "user.json")
+USERS_FILE = "user.json"
 
 
 def load_users():

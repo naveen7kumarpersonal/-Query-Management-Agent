@@ -1,6 +1,6 @@
 [
     {
-        "email": "admin@ey.com",
+        "email": "20ai001.adarsh@sjec.ac.in",
         "password": "admin123",
         "role": "admin",
         "name": "System Admin",
@@ -11,7 +11,7 @@
         ]
     },
     {
-        "email": "manager@ey.com",
+        "email": "adarshsurekha@gmail.com",
         "password": "mgr123",
         "role": "manager",
         "name": "Operations Manager",

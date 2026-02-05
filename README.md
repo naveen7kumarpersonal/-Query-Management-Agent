@@ -1,173 +1,85 @@
-# 🧠 EY Query Management Agent
+# EY Query Management Tool (QMT) - AI Powered
 
-A role-based **Query & Ticket Management Dashboard** built with **Flask**, **Pandas**, **Matplotlib**, and a modern **Bootstrap UI**.
+An intelligent, AI-driven web application for managing and resolving queries (tickets) with automated workflows. Built for EY to streamline operations using Azure OpenAI and Excel-based data management.
 
-This application provides:
+## 🚀 Features
 
-* 🔐 Secure Login System
-* 👤 Role-based access (Admin / Manager / Employee)
-* 📊 Advanced Manager Dashboard with analytics & filters
-* 🧾 Invoice & Ticket insights from Excel data
-* 💬 Chat UI (frontend ready for future AI integration)
-* 👥 Admin user management
-
----
-
-## ✨ Features
-
-### 👨‍💼 Admin
-
-* Add and manage users
-* Assign roles (Manager / Employee)
-* View all users in the system
-
-### 📈 Manager
-
-* Full analytics dashboard
-* Filter tickets by **Team / User / Type**
-* KPI cards for tickets and invoices
-* Charts for:
-
-  * Ticket status distribution
-  * Tickets by team & type
-  * Invoice payment status
-
-### 🧑‍💻 Employee
-
-* View only their assigned open tickets
-* Clean ticket table with priority, status, and category
-
-### 💬 Chat Interface
-
-* Dedicated chat UI
-* Session-ready layout for future AI integration
-
----
-
-## 🗂️ Project Structure
-
-```
-.
-├── backend/
-│   ├── app.py           (Flask routes & logic)
-│   ├── config.py        (Azure OpenAI Config)
-│   ├── table_db.py      (Excel data utilities)
-│   ├── user.json        (User database)
-│   ├── requirements.txt (Dependencies)
-│   └── QMT Data New.xlsx (Data Source)
-├── frontend/
-│   ├── templates/       (HTML Jinja2 templates)
-│   │   ├── base.html
-│   │   ├── login.html
-│   │   ├── admin_dashboard.html
-│   │   ├── manager_dashboard.html
-│   │   ├── employee_dashboard.html
-│   │   └── chat.html
-│   └── static/          (CSS, JS, Images)
-└── README.md
-```
-
----
-
-## 🧩 Key Files
-
-* Main Flask app and routing: 
-* Admin UI: 
-* Base layout and theme: 
-* Chat UI: 
-* Employee tickets view: 
-* Login page: 
-* Manager analytics dashboard: 
-
----
+*   **AI-Powered Chat Assistant**: Employees can chat with the system to query invoice status, PO details, and ticket updates naturally.
+*   **Automated Ticket Resolution**:
+    *   The `TicketAIAgent` analyzes open tickets in the background.
+    *   It checks invoices/POs in the database.
+    *   If a solution is found, it **auto-closes** the ticket and saves the resolution.
+    *   It **emails the manager** automatically with the resolution details.
+*   **Role-Based Access Control (RBAC)**:
+    *   **Employees**: View and create their own tickets.
+    *   **Managers**: View team tickets, approve/reject resolutions, view analytics.
+    *   **Admins**: Full system access.
+*   **Excel as Database**: Seamless integration with `QMT Data New.xlsx` for zero-setup data persistence.
+*   **Interactive Dashboards**: Data visualization for ticket status and team performance.
 
 ## 🛠️ Tech Stack
 
-* **Backend**: Flask, Pandas
-* **Frontend**: Bootstrap 5, HTML, CSS, FontAwesome
-* **Visualization**: Matplotlib
-* **Data Source**: Excel → Pandas DataFrames
-* **Auth**: Session-based login with role control
+*   **Backend**: Python, Flask
+*   **AI/LLM**: Azure OpenAI (GPT-4)
+*   **Database**: Excel (pandas, openpyxl)
+*   **Notifications**: SMTP Email Service (Gmail Integration)
+*   **Frontend**: HTML5, Bootstrap, Jinja2 Templates
 
----
-
-## ⚙️ Setup Instructions
-
-### 1️⃣ Clone the repo
-
-```bash
-git clone https://github.com/your-username/ey-query-agent.git
-cd ey-query-agent
-```
-
-### 2️⃣ Install dependencies
-
-```bash
-pip install -r backend/requirements.txt
-```
-
-### 3️⃣ Setup Environment
-
-Create a `.env` file in the `backend/` directory with your Azure OpenAI credentials.
-
-### 4️⃣ Run the app
-
-```bash
-cd backend
-python app.py
-```
-
-App runs on:
+## 📂 Project Structure
 
 ```
-http://localhost:5000/login
+EY-Project/
+├── backend/
+│   ├── app.py                 # Main Flask Application
+│   ├── agents/                # AI Agents Logic
+│   │   ├── chat_agent.py      # Conversational Agent
+│   │   └── ticket_agent.py    # Background Processing Agent
+│   ├── email_service.py       # SMTP Email Logic
+│   ├── table_db.py            # Excel Database Handler
+│   ├── users.json             # User Authentication Data
+│   ├── templates/             # HTML Templates
+│   ├── requirements.txt       # Python Dependencies
+│   └── .env                   # Environment Variables
+├── README.md                  # Project Documentation
+└── QMT Data New.xlsx         # Main Data File
 ```
 
----
+## ⚙️ Setup & Installation
 
-## 👤 Default Users (if `user.json` not present)
+1.  **Clone the repository** (or navigate to the project folder).
+2.  **Create a Virtual Environment**:
+    ```bash
+    python -m venv venv
+    # Windows
+    venv\Scripts\activate
+    # Mac/Linux
+    source venv/bin/activate
+    ```
+3.  **Install Dependencies**:
+    ```bash
+    pip install -r backend/requirements.txt
+    ```
+4.  **Configure Environment**:
+    *   Copy `backend/.env.example` to `backend/.env`.
+    *   Fill in your **Azure OpenAI** keys and **SMTP** credentials.
 
-| Role     | Email                                   | Password |
-| -------- | --------------------------------------- | -------- |
-| Admin    | [admin@ey.com](mailto:admin@ey.com)     | 123      |
-| Manager  | [manager@ey.com](mailto:manager@ey.com) | 123      |
-| Employee | [robert@ey.com](mailto:robert@ey.com)   | 123      |
+## ▶️ Running the Application
 
----
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
+2.  Run the Flask app:
+    ```bash
+    python app.py
+    ```
+3.  Open your browser and visit: `http://localhost:5000`
 
-## 📊 Dashboard Capabilities
+## 📧 Email Notifications
+The system uses SMTP to send notifications.
+*   Ensure `SMTP_EMAIL` and `SMTP_PASSWORD` are set in `.env`.
+*   If using Gmail, generate an **App Password** (do not use your login password).
 
-* Ticket KPIs (Open, Closed, Auto-resolved, AP vs AR)
-* Invoice KPIs (Paid, Unpaid, Overdue, Total Amount)
-* Interactive filtering
-* Auto-generated charts from live data
-
----
-
-## 🚀 Future Scope
-
-* Connect Chat UI with AI backend
-* Replace JSON users with database
-* Add ticket drill-down pages
-* Export dashboard reports
-
----
-
-## 🧠 Note on Data Schema Update
-
-The data schema was **recently updated** because the structure of the Excel file changed significantly.
-All dashboards and filters are aligned with the **new data format**.
-
----
-
-## 📸 Screenshots
-
-> Add screenshots of Login, Admin, Manager, and Employee dashboards here.
-
----
-
-## 🏁 Author
-
-Built as part of an EY internal query management and analytics system.
-
----
+## 🤖 AI Agents
+*   **Chat Agent uses**: `backend/agents/chat_agent.py` to answer real-time queries.
+*   **Ticket Agent uses**: `backend/agents/ticket_agent.py` to batch process open tickets and resolve them.

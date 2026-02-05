@@ -2,6 +2,8 @@ import os
 import json
 from datetime import datetime
 from openai import AzureOpenAI
+from utils import get_user_email_by_name,get_manager_by_team
+from email_service import send_email
 from config import get_azure_client, get_deployment_name
 from table_db import get_all_tickets_df, search_invoices, update_multiple_fields
 
@@ -127,6 +129,33 @@ class TicketAIAgent:
                         "AI Response": args['ai_response'],
                         "Ticket Status": "Closed" if args['auto_solved'] else "Open"
                     })
+                    
+                    manager = get_manager_by_team(ticket['Assigned Team'])
+                    
+                    if manager:
+                        email_body = f"""Hello {manager['name']},
+
+This is to inform you that the AI agent has successfully resolved and CLOSED the following ticket.
+
+Ticket ID: {ticket_id}
+Team: {ticket.get('Assigned Team', 'N/A')}
+
+AI Resolution:
+{args.get('ai_response', 'No details provided.')}
+
+Marking this ticket as auto_solved since the query has been successfully resolved via the system.
+
+No action is required from your side.
+
+Regards,
+EY Query Management System
+"""
+                        send_email(
+                            to_email=manager['email'],
+                            subject=f"Ticket Resolved: {ticket['Ticket ID']}",
+                            body=email_body
+                        )
+                
                     
                     if success:
                         print(f"SUCCESS: Ticket {ticket_id} updated in Excel.")
