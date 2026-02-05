@@ -8,8 +8,13 @@ import pandas as pd
 import os
 from datetime import datetime
 
-FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "QMT Data New.xlsx")
+# backend/table_db.py → project root
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+FILE = os.path.join(BASE_DIR, "data", "QMT Data New.xlsx")
+
+if not os.path.exists(FILE):
+    raise FileNotFoundError(f"Excel file not found at: {FILE}")
 
 def get_all_tickets_df(sheet_name="Tickets"):
     """
