@@ -56,21 +56,10 @@
         height: 4px;
     }
 
-    .kpi-card.yellow::before {
-        background: var(--ey-yellow);
-    }
-
-    .kpi-card.blue::before {
-        background: var(--accent-blue);
-    }
-
-    .kpi-card.green::before {
-        background: var(--accent-green);
-    }
-
-    .kpi-card.red::before {
-        background: var(--accent-red);
-    }
+    .kpi-card.yellow::before { background: var(--ey-yellow); }
+    .kpi-card.blue::before   { background: var(--accent-blue); }
+    .kpi-card.green::before  { background: var(--accent-green); }
+    .kpi-card.red::before    { background: var(--accent-red); }
 
     .kpi-icon {
         width: 48px;
@@ -83,25 +72,10 @@
         margin-bottom: 1rem;
     }
 
-    .kpi-icon.yellow {
-        background: var(--ey-yellow-light);
-        color: var(--ey-black);
-    }
-
-    .kpi-icon.blue {
-        background: #dbeafe;
-        color: var(--accent-blue);
-    }
-
-    .kpi-icon.green {
-        background: #d1fae5;
-        color: var(--accent-green);
-    }
-
-    .kpi-icon.red {
-        background: #fee2e2;
-        color: var(--accent-red);
-    }
+    .kpi-icon.yellow { background: var(--ey-yellow-light); color: var(--ey-black); }
+    .kpi-icon.blue   { background: #dbeafe; color: var(--accent-blue); }
+    .kpi-icon.green  { background: #d1fae5; color: var(--accent-green); }
+    .kpi-icon.red    { background: #fee2e2; color: var(--accent-red); }
 
     .kpi-label {
         color: var(--text-secondary);
@@ -185,6 +159,24 @@
     .header-actions {
         display: flex;
         gap: 0.75rem;
+    }
+
+    /* Review Table Styling */
+    .review-table thead th {
+        background: #fffbeb;
+        color: #92400e;
+        font-weight: 600;
+    }
+
+    .review-table .btn-sm {
+        min-width: 110px;
+    }
+
+    .ai-summary-cell {
+        max-width: 340px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 </style>
 {% endblock %}
@@ -282,6 +274,64 @@
         <div class="kpi-subtitle">{{ ticket_rates.auto_resolved }}% of closed</div>
     </div>
 </div>
+
+<!-- NEW: AI Auto-Closed Tickets – Your Review -->
+<h3 class="section-title">
+    <span class="section-icon"><i class="fas fa-robot"></i></span>
+    AI Auto-Closed Tickets – Your Review
+</h3>
+
+{% if review_tickets and review_tickets|length > 0 %}
+<div class="card shadow mb-5 border-warning">
+    <div class="card-header bg-warning-subtle text-warning-emphasis">
+        <strong>{{ review_tickets|length }} ticket{{ 's' if review_tickets|length != 1 else '' }} closed by AI – your action required</strong>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 review-table">
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Closed On</th>
+                        <th>AI Resolution</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in review_tickets %}
+                    <tr>
+                        <td><strong>{{ ticket['Ticket ID'] }}</strong></td>
+                        <td>{{ ticket.get('Ticket Closed Date', '—') }}</td>
+                        <td class="ai-summary-cell">
+                            {{ ticket.get('AI Response', 'No summary provided') | truncate(80) }}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('review_ticket_action', ticket_id=ticket['Ticket ID']) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="action" value="reopen">
+                                <button type="submit" class="btn btn-sm btn-success me-2">
+                                    <i class="fas fa-undo me-1"></i> Reopen
+                                </button>
+                            </form>
+                            <form action="{{ url_for('review_ticket_action', ticket_id=ticket['Ticket ID']) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="action" value="confirm_closed">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-check me-1"></i> Confirm Closed
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-success mb-5">
+    <i class="fas fa-check-circle me-2"></i>
+    No AI-closed tickets waiting for your review.
+</div>
+{% endif %}
 
 <!-- Invoices KPIs -->
 <h3 class="section-title">
