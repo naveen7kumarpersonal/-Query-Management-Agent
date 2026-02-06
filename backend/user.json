@@ -11,10 +11,10 @@
         ]
     },
     {
-        "email": "manager@ey.com",
+        "email": "mansur@ey.com",
         "password": "123",
         "role": "manager",
-        "name": "Operations Manager",
+        "name": "Mansur",
         "team": "AP"
     },
     {
@@ -23,13 +23,6 @@
         "name": "Robert Brown",
         "role": "employee",
         "team": "AP"
-    },
-    {
-        "email": "mansur@gmail.com",
-        "password": "123",
-        "name": "Mansur",
-        "role": "employee",
-        "team": "AR"
     },
     {
         "email": "michaelgreen@ey.com",
