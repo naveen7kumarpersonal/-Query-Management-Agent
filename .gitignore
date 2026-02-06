@@ -1,68 +1,128 @@
-# -----------------------------
-# Python cache
-# -----------------------------
+# Python-specific
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
 
-# -----------------------------
-# Virtual environment
-# -----------------------------
+# Virtual environments
 venv/
-.env/
-.venv/
 env/
+.venv/
+ENV/
 
-# -----------------------------
-# Environment variables / secrets
-# -----------------------------
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Installer logs
+pip-selfcheck.json
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.pytest_cache/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff (if you ever add it)
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff
+instance/
+.webassets-cache
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
 .env
-.env.*
-backend/.env
-backend/.env.*
+.env.local
+.env.*.local
 
-# -----------------------------
-# VS Code / PyCharm / IDE
-# -----------------------------
+# Azure / secrets
+*.key
+*.pem
+*.pfx
+.azure/
+.azureml/
+
+# IDE / Editor folders
 .vscode/
 .idea/
-*.iml
+*.swp
+*.swo
+*.swn
 
-# -----------------------------
-# OS files
-# -----------------------------
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# -----------------------------
-# Logs
-# -----------------------------
+# Logs & temp files
 *.log
+*.tmp
+*.bak
+*.swp
+*~
 
-# -----------------------------
-# Database / local data
-# -----------------------------
-*.db
+# Database backups / exports (if you add SQLite later)
+*.sql
+*.sqlite
 *.sqlite3
+*.db
+*.db-journal
+*.bak
 
-# -----------------------------
-# Excel / data files (important for your project)
-# -----------------------------
-*.xlsx
-*.csv
+# Matplotlib / plots (temporary files)
+*.pdf
+*.png   # ← comment this out if you want to commit generated chart images
+*.svg
 
-# -----------------------------
-# Matplotlib cache
-# -----------------------------
-.matplotlib/
-
-# -----------------------------
-# Python build files
-# -----------------------------
-build/
-dist/
-*.egg-info/
-
+# Keep your data files if they are small/static, but ignore large ones
+# *.csv
+# *.xlsx
+# data/*.csv
+# data/*.xlsx
 
 # Personal notes / scratch files
 notes.md
