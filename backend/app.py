@@ -267,6 +267,38 @@ def auto_assign_tickets():
 
     return redirect(url_for("dashboard"))
 
+def auto_assign_single_ticket(ticket_id):
+    """
+    Assigns a single open ticket to the user with the lowest open-ticket workload
+    """
+    df = get_all_tickets_df()
+
+    # Get all users
+    users = df["User Name"].dropna().unique().tolist()
+    if not users:
+        return None
+
+    # Calculate current open-ticket workload
+    workload = {
+        user: len(
+            df[
+                (df["User Name"] == user) &
+                (df["Ticket Status"].str.lower() == "open")
+            ]
+        )
+        for user in users
+    }
+
+    # Pick user with lowest workload
+    assigned_user = min(workload, key=workload.get)
+
+    # Update ticket
+    update_multiple_fields(ticket_id, {
+        "User Name": assigned_user
+    })
+
+    return assigned_user
+
 
 # ────────────────────────────────────────────────
 # Handle Reopen / Confirm Closed for AI-closed tickets
@@ -522,20 +554,29 @@ def reject_ticket(ticket_id):
     if not validate_token(ticket_id, token):
         return "❌ Invalid or expired rejection link.", 403
 
+    # Reopen ticket
     success = update_multiple_fields(ticket_id, {
         "Ticket Status": "Open",
         "Auto Solved": False,
         "Admin Review Needed": "No"
     })
 
-    if success:
-        return f"""
-        <h2>❌ Ticket {ticket_id} Reopened</h2>
-        <p>The ticket has been reopened and sent back to the queue.</p>
-        """
-    else:
+    if not success:
         return "❌ Failed to update ticket.", 500
 
+    # 🔥 NEW: auto-assign immediately
+    assigned_user = auto_assign_single_ticket(ticket_id)
+
+    if assigned_user:
+        return f"""
+        <h2>🔄 Ticket {ticket_id} Reopened</h2>
+        <p>The ticket has been reopened and automatically assigned to <b>{assigned_user}</b>.</p>
+        """
+    else:
+        return f"""
+        <h2>⚠️ Ticket {ticket_id} Reopened</h2>
+        <p>The ticket is open but could not be auto-assigned.</p>
+        """
 
 
 if __name__ == "__main__":
