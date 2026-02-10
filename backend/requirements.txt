@@ -13,3 +13,5 @@ matplotlib==3.9.2
 
 # Better date/time handling (helps with Excel serial dates)
 python-dateutil==2.9.0.post0
+
+weasyprint==62.3
