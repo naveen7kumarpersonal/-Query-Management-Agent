@@ -142,6 +142,16 @@ def extract_invoice_candidates(ticket: dict) -> list[str]:
             ordered.append(cand)
     return ordered
 
+def _get_ticket_field(ticket: dict, target_name: str):
+    """Safely fetch a field from ticket dict ignoring casing/extra spaces."""
+    if not target_name:
+        return None
+    normalized = target_name.strip().lower()
+    for key, value in ticket.items():
+        if key and key.strip().lower() == normalized:
+            return value
+    return None
+
 
 def generate_approval_token(ticket_id: str) -> str:
     """Generate SHA256 token for approval links"""
@@ -152,20 +162,45 @@ def generate_approval_token(ticket_id: str) -> str:
 
 def get_submitter_email(ticket: dict) -> str | None:
     """
-    Get requester email with priority: Customer Email > Submitter Email > Requester Email > Email
+    Get requester email with priority: Requestor Email columns → legacy requester fields → mapped employee fallback.
     """
-    for field in ["Customer Email", "Submitter Email", "Requester Email", "Email"]:
-        if field in ticket and ticket[field]:
-            email = str(ticket[field]).strip()
-            if email and email.lower() not in ["", "nan", "none", "n/a", "null"]:
+    email_fields = [
+        "Requestor Email ID",
+        "Requestor Email",
+        "Requester Email",
+        "Submitter Email",
+        "Customer Email",
+        "Email",
+    ]
+    for field in email_fields:
+        raw_val = _get_ticket_field(ticket, field)
+        if raw_val:
+            email = str(raw_val).strip()
+            if email and email.lower() not in ["", "nan", "none", "null", "n/a"]:
                 return email
 
-    # Fallback: lookup by user name
-    user_name = ticket.get("User Name") or ticket.get("Assigned To")
-    if user_name:
-        email = get_user_email_by_name(user_name)
-        if email:
-            return email
+    # Fallback to requestor name if present (sometimes listed without email)
+    requestor_name = (
+        _get_ticket_field(ticket, "Requestor")
+        or _get_ticket_field(ticket, "Requestor Name")
+        or _get_ticket_field(ticket, "Requester Name")
+    )
+    if requestor_name:
+        req_email = get_user_email_by_name(requestor_name)
+        if req_email:
+            return req_email
+
+    # Final fallback to internal employee associated with ticket
+    employee_name = (
+        _get_ticket_field(ticket, "User Name(Ticket Created By)")
+        or ticket.get("User Name")
+        or ticket.get("Assigned To")
+    )
+    if employee_name:
+        emp_email = get_user_email_by_name(employee_name)
+        if emp_email:
+            return emp_email
+
     return None
 
 
@@ -503,26 +538,28 @@ EY Query Management Team
 """
                             else:
                                 print("   ✗ Document generation failed")
+                                payment_status = invoice_payload.get("Payment Status", "Unknown")
                                 email_body = f"""Dear Requester,
 
-We attempted to generate a document for ticket {ticket_id}, but encountered an issue while creating the PDF.
+We attempted to generate a payment confirmation for ticket {ticket_id} (invoice {invoice_payload.get('Invoice Number', 'N/A')}), but the PDF export failed.
 
-{ai_response}
+Current ledger status: {payment_status}.
 
-Please contact your AP/AR team directly for assistance with document requests.
+If you require an officially stamped confirmation, please reach out to your AP/AR partner and they will provide the formal document.
 
 Best regards,
 EY Query Management Team
 """
                         else:
                             print("   ⚠️  Missing invoice data or generator disabled")
+                            fallback_status = invoice_payload.get("Payment Status", "Unknown") if invoice_payload else "Unknown"
                             email_body = f"""Dear Requester,
 
 Your request for ticket {ticket_id} has been reviewed.
 
 {ai_response}
 
-Unfortunately, we could not access detailed invoice data or the document service is temporarily unavailable. Please contact your AP/AR team for assistance.
+We could not retrieve the invoice details needed to create a PDF automatically (current ledger status: {fallback_status}). Please contact your AP/AR team if you require an official document.
 
 Best regards,
 EY Query Management Team
@@ -553,10 +590,12 @@ EY Query Management Team
 
                     # Send email to requester (categories 1 & 2)
                     if success and recipient_email and closure_type != "needs_approval":
+                        status_text = update_dict.get("Ticket Status", ticket.get("Ticket Status", "Open"))
+                        enriched_body = f"{email_body.rstrip()}\n\nTicket status (AI): {status_text}"
                         sent = send_email(
                             to_email=recipient_email,
                             subject=email_subject,
-                            body=email_body,
+                            body=enriched_body,
                             attachment_path=attachment_path
                         )
                         if sent:
@@ -595,20 +634,22 @@ EY Query Management Team
                         # Email requester
                         requester_email = get_submitter_email(ticket)
                         if requester_email:
-                            send_email(
-                                to_email=requester_email,
-                                subject=f"Ticket {ticket_id} - Assigned to Specialist",
-                                body=f"""Dear Requester,
+                            status_text = update_dict.get("Ticket Status", ticket.get("Ticket Status", "Open"))
+                            requester_body = f"""Dear Requester,
 
 Ticket {ticket_id} has been assigned to our {target_team} billing specialist team.
 
 Reason: {reason}
 
-A specialist will review your request and contact you shortly.
+Ticket status (AI): {status_text}
 
 Best regards,
 EY Query Management System
 """
+                            send_email(
+                                to_email=requester_email,
+                                subject=f"Ticket {ticket_id} - Assigned to Specialist",
+                                body=requester_body
                             )
                             print(f"   📧 Requester notified")
 

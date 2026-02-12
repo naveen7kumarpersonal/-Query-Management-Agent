@@ -29,7 +29,7 @@ def _format_currency(value) -> str:
     try:
         if value in (None, ""):
             return "N/A"
-        return f""
+e        return f"${float(value):,.2f}"
     except Exception:
         return str(value)
 
@@ -61,23 +61,32 @@ class SimpleReportPDF(FPDF):
         self.cell(0, 10, f"Generated {datetime.now().strftime('%Y-%m-%d %H:%M')}", align="C")
 
 
+def _effective_width(pdf: FPDF) -> float:
+    return pdf.w - pdf.l_margin - pdf.r_margin
+
+
 def _write_rows(pdf: SimpleReportPDF, rows: Sequence[Row]) -> None:
+    width = _effective_width(pdf)
     for label, value in rows:
         pdf.set_font("Helvetica", "B", 11)
-        pdf.multi_cell(0, 6, f"{label}:")
+        pdf.multi_cell(width, 6, f"{label}:")
+        pdf.set_x(pdf.l_margin)
         pdf.set_font("Helvetica", "", 11)
-        pdf.multi_cell(0, 6, value)
+        pdf.multi_cell(width, 6, value)
+        pdf.set_x(pdf.l_margin)
         pdf.ln(1)
 
 
 def _build_pdf(title: str, subtitle: str, rows: Sequence[Row], notes: str, output_path: str) -> str | None:
     pdf = SimpleReportPDF()
     pdf.add_page()
+    width = _effective_width(pdf)
 
     pdf.set_font("Helvetica", "B", 14)
     pdf.cell(0, 8, title, ln=1)
     pdf.set_font("Helvetica", "", 11)
-    pdf.multi_cell(0, 6, subtitle)
+    pdf.multi_cell(width, 6, subtitle)
+    pdf.set_x(pdf.l_margin)
     pdf.ln(4)
 
     _write_rows(pdf, rows)
@@ -85,7 +94,8 @@ def _build_pdf(title: str, subtitle: str, rows: Sequence[Row], notes: str, outpu
     if notes:
         pdf.ln(3)
         pdf.set_font("Helvetica", "I", 10)
-        pdf.multi_cell(0, 5, notes)
+        pdf.multi_cell(width, 5, notes)
+        pdf.set_x(pdf.l_margin)
 
     try:
         pdf.output(output_path)
